@@ -1,12 +1,21 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import os from "os";
+import cors from "cors";
+import { router } from "./app/routes";
+import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
+import notFound from "./app/middlewares/notFound";
 
 const app = express();
 
-// Test route
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.get("/", (req: Request, res: Response, next: NextFunction) => {
+app.use(express.json());
+app.use(cors());
+
+// All Routers
+app.use("/api/v1", router);
+
+// Test Route
+app.get("/", (req: Request, res: Response) => {
   const currentDateTime = new Date().toISOString();
   const clientIp = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   const serverHostname = os.hostname();
@@ -35,5 +44,10 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
   });
 });
 
+// Global Error Handler
+app.use(globalErrorHandler);
+
+// Not Found Route
+app.use(notFound);
 
 export default app;
