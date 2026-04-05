@@ -1,14 +1,26 @@
-import { IUser } from "./user.interface";
+import AppError from "../../ErrorHelpers/AppError";
+import { IAuthProvider, IUser } from "./user.interface";
 import { User } from "./user.model";
+import { StatusCodes } from "http-status-codes";
 
-type CreateUserPayload = Pick<IUser, "name" | "email">;
+const createUser = async (payload: Partial<IUser>) => {
+  const { email, ...rest } = payload;
+  if (!email) {
+    throw new Error("Email is required");
+  }
 
-const createUser = async (payload: CreateUserPayload) => {
-  const { name, email } = payload;
+  const isUserExist = await User.findOne({ email });
+
+  if (isUserExist) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "This user are already exist");
+  }
+
+  const authProvider: IAuthProvider = { provider: "google", providerId: email };
 
   const user = await User.create({
-    name,
     email,
+    auths: [authProvider],
+    ...rest,
   });
 
   return user;
