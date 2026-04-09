@@ -6,9 +6,10 @@ import bcryptjs from "bcryptjs";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
-  if (!email) {
-    throw new Error("Email is required");
-  }
+
+   if (!email) {
+     throw new AppError(StatusCodes.BAD_REQUEST, "Email is required");
+   }
 
   const isUserExist = await User.findOne({ email });
 
@@ -24,7 +25,7 @@ const createUser = async (payload: Partial<IUser>) => {
     email,
     password: hashedPassword,
     auths: [authProvider],
-    ...rest,
+    ...rest, 
   });
 
   return user;
