@@ -283,17 +283,9 @@ GET /stats/tour
 
 ------------------------------------------------------------------------
 
-# Project Structure
-
-src ┣ app.ts ┣ server.ts ┣ config ┣ modules ┃ ┣ auth ┃ ┣ user ┃ ┣ tour ┃
-┣ booking ┃ ┣ payment ┃ ┣ division ┃ ┗ guide ┣ middlewares ┣ routes ┗
-utils
-
-------------------------------------------------------------------------
-
 # Installation
 
-git clone https://github.com/your-repo/ph-tour-management-system
+git clone https://github.com/hzamanshohag/ph-tour-management-system-backend
 
 npm install
 
