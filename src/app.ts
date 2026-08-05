@@ -1,53 +1,44 @@
-import express, { Request, Response } from "express";
-import { StatusCodes } from "http-status-codes";
-import os from "os";
+import cookieParser from "cookie-parser";
 import cors from "cors";
-import { router } from "./app/routes";
+import express, { Request, Response } from "express";
+import expressSession from "express-session";
+import passport from "passport";
+import { envVars } from "./app/config/env";
+import "./app/config/passport";
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 import notFound from "./app/middlewares/notFound";
+import { router } from "./app/routes";
 
-const app = express();
+const app = express()
 
-app.use(express.json());
-app.use(cors());
 
-// All Routers
-app.use("/api/v1", router);
+app.use(expressSession({
+    secret: envVars.EXPRESS_SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+}))
+app.use(passport.initialize())
+app.use(passport.session())
+app.use(cookieParser())
+app.use(express.json())
+app.set("trust proxy", 1);
+app.use(express.urlencoded({ extended: true }))
+app.use(cors({
+    origin: envVars.FRONTEND_URL,
+    credentials: true
+}))
 
-// Test Route
+app.use("/api/v1", router)
+
 app.get("/", (req: Request, res: Response) => {
-  const currentDateTime = new Date().toISOString();
-  const clientIp = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-  const serverHostname = os.hostname();
-  const serverPlatform = os.platform();
-  const serverUptime = os.uptime();
+    res.status(200).json({
+        message: "Welcome to Tour Management System Backend"
+    })
+})
 
-  res.status(StatusCodes.OK).json({
-    success: true,
-    message: "Welcome to Tour Management system backend",
-    version: "1.0.0",
-    clientDetails: {
-      ipAddress: clientIp,
-      accessedAt: currentDateTime,
-    },
-    serverDetails: {
-      hostname: serverHostname,
-      platform: serverPlatform,
-      uptime: `${Math.floor(serverUptime / 60 / 60)} hours ${Math.floor(
-        (serverUptime / 60) % 60,
-      )} minutes`,
-    },
-    developerContact: {
-      email: "hzaman.live@gmail.com",
-      website: "https://hzaman.vercel.app",
-    },
-  });
-});
 
-// Global Error Handler
-app.use(globalErrorHandler);
+app.use(globalErrorHandler)
 
-// Not Found Route
-app.use(notFound);
+app.use(notFound)
 
-export default app;
+export default app
